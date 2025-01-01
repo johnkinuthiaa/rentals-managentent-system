@@ -1,4 +1,4 @@
-package com.slippery.rentalmanagementsystem;
+package com.slippery.rentalmanagementsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,6 +14,7 @@ public class UserDto {
     private int statusCode;
     private String message;
     private String errorMessage;
+    private String jwtToken;
     private User user;
     private List<User> userList;
 }

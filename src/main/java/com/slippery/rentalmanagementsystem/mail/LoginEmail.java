@@ -1,7 +1,5 @@
 package com.slippery.rentalmanagementsystem.mail;
 
-import com.maxmind.geoip.Location;
-import com.maxmind.geoip.LookupService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
