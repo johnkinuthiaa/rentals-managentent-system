@@ -2,6 +2,7 @@ package com.slippery.rentalmanagementsystem.service.impl;
 
 import com.slippery.rentalmanagementsystem.dto.PropertyListingDto;
 import com.slippery.rentalmanagementsystem.mail.PropertyCreation;
+import com.slippery.rentalmanagementsystem.mail.RentalAgreementCreation;
 import com.slippery.rentalmanagementsystem.model.PropertyListing;
 import com.slippery.rentalmanagementsystem.model.RentalAgreement;
 import com.slippery.rentalmanagementsystem.model.User;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PropertyListingServiceImpl implements PropertyListingService {
@@ -26,12 +28,14 @@ public class PropertyListingServiceImpl implements PropertyListingService {
     private final PropertyCreation creationEmail;
     private final RentalAgreementRepository rentalAgreementRepository;
     private final PasswordEncoder passwordEncoder =new BCryptPasswordEncoder(12);
+    private final RentalAgreementCreation rentalAgreementCreation;
 
-    public PropertyListingServiceImpl(PropertyRepository repository, UserRepository userRepository, PropertyCreation creationEmail, RentalAgreementRepository rentalAgreementRepository) {
+    public PropertyListingServiceImpl(PropertyRepository repository, UserRepository userRepository, PropertyCreation creationEmail, RentalAgreementRepository rentalAgreementRepository, RentalAgreementCreation rentalAgreementCreation) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.creationEmail = creationEmail;
         this.rentalAgreementRepository = rentalAgreementRepository;
+        this.rentalAgreementCreation = rentalAgreementCreation;
     }
 
     @Override
@@ -68,7 +72,7 @@ public class PropertyListingServiceImpl implements PropertyListingService {
     }
 
     @Override
-    public PropertyListingDto addUser(PropertyListingDto request,Long propertyId, Long ownerId,String tenantName) {
+    public PropertyListingDto addUser(PropertyListingDto request,Long propertyId, Long ownerId,String tenantName) throws IOException {
 
         PropertyListingDto response =new PropertyListingDto();
         Optional<User>owner =userRepository.findById(ownerId);
@@ -96,38 +100,95 @@ public class PropertyListingServiceImpl implements PropertyListingService {
             response.setStatusCode(404);
             return response;
         }
-        User tenant =request.getUser();
-        tenant.setPassword(passwordEncoder.encode(tenant.getPassword()));
-        tenant.setCreatedOn(LocalDateTime.now());
-        userRepository.save(tenant);
+        try{
+            User tenant =request.getUser();
+            tenant.setPassword(passwordEncoder.encode(tenant.getPassword()));
+            tenant.setCreatedOn(LocalDateTime.now());
+            userRepository.save(tenant);
 
-        RentalAgreement agreement =new RentalAgreement();
-        agreement.setLandlord(owner.get());
-        agreement.setEndDate(request.getRentalAgreement().getEndDate());
-        agreement.setStartOn(request.getRentalAgreement().getStartOn());
-        agreement.setMonthlyRent(request.getRentalAgreement().getMonthlyRent());
-        agreement.setPropertyListing(listing.get());
-        agreement.setSecurityDeposit(request.getRentalAgreement().getSecurityDeposit());
-        agreement.setStatus("ACTIVE");
-        agreement.setTenant(tenant);
-        rentalAgreementRepository.save(agreement);
 
-        List<User> tenants =listing.get().getTenants();
-        tenants.add(tenant);
-        List<RentalAgreement> agreements =listing.get().getRentalAgreements();
-        agreements.add(agreement);
-        listing.get().setRentalAgreements(agreements);
-        repository.save(listing.get());
+            RentalAgreement agreement =new RentalAgreement();
+            agreement.setLandlord(owner.get());
+            agreement.setEndDate(request.getRentalAgreement().getEndDate());
+            agreement.setStartOn(request.getRentalAgreement().getStartOn());
+            agreement.setMonthlyRent(request.getRentalAgreement().getMonthlyRent());
+            agreement.setPropertyListing(listing.get());
+            agreement.setSecurityDeposit(request.getRentalAgreement().getSecurityDeposit());
+            agreement.setStatus("ACTIVE");
+            agreement.setTenant(tenant);
+            rentalAgreementRepository.save(agreement);
 
-        response.setMessage("New rental agreement created for "+tenantName);
-        response.setStatusCode(200);
+            List<User> tenants =listing.get().getTenants();
+            tenants.add(tenant);
+            List<RentalAgreement> agreements =listing.get().getRentalAgreements();
+            agreements.add(agreement);
+            listing.get().setRentalAgreements(agreements);
+            repository.save(listing.get());
+            rentalAgreementCreation.messageToUser(owner.get().getEmail(),tenant.getEmail(),tenantName,agreement,listing.get());
+            rentalAgreementCreation.sendMessageToLandlord(owner.get().getEmail(),owner.get().getUsername(),agreement);
+
+            response.setMessage("New rental agreement created for "+tenantName);
+            response.setStatusCode(200);
+
+        }catch (IOException e){
+            throw new IOException();
+        }
 
         return response;
     }
 
     @Override
     public PropertyListingDto removeUser(Long propertyId, Long ownerId, Long tenantId) {
-        return null;
+        PropertyListingDto response =new PropertyListingDto();
+        Optional<User>owner =userRepository.findById(ownerId);
+        Optional<PropertyListing> listing =repository.findById(propertyId);
+        Optional<User> tenant =userRepository.findById(tenantId);
+        if( tenant.isEmpty()){
+            response.setMessage("tenant not found");
+            response.setStatusCode(404);
+            return response;
+        }
+
+        if(owner.isEmpty()){
+            response.setMessage("owner not found");
+            response.setStatusCode(404);
+            return response;
+        }
+        if(listing.isEmpty()){
+            response.setMessage("property not found");
+            response.setStatusCode(404);
+            return response;
+        }
+        if(!listing.get().getLandlord().getId().equals(owner.get().getId())){
+            response.setMessage("property does not belong to "+owner.get().getUsername());
+            response.setStatusCode(404);
+            return response;
+        }
+        if(!listing.get().getTenants().contains(tenant.get())){
+            response.setMessage("user does not does not belong to "+listing.get().getName());
+            response.setStatusCode(404);
+            return response;
+        }
+
+
+        //        remove user from property tenants
+        listing.get().getTenants().remove(tenant.get());
+        repository.save(listing.get());
+
+
+
+//        delete agreement
+        List<RentalAgreement> agreement = new ArrayList<>(rentalAgreementRepository.findAll().stream()
+                .filter(agreement1 -> agreement1.getTenant().getId().equals(tenant.get().getId()))
+                .toList());
+        rentalAgreementRepository.delete(agreement.get(0));
+
+
+        //        delete user
+        userRepository.delete(tenant.get());
+        response.setMessage("User removed from the system");
+        response.setStatusCode(200);
+        return response;
     }
 
     @Override

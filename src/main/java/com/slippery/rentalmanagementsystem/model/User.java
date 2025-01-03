@@ -26,6 +26,6 @@ public class User {
     private String address;
     private LocalDateTime createdOn;
     private Boolean isActive =false;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<PropertyListing> propertyListings;
 }

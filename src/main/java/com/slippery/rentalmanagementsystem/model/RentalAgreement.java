@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,11 +25,12 @@ public class RentalAgreement {
     private Long monthlyRent;
     private Long securityDeposit;
     private String status;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private PropertyListing propertyListing;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private User tenant;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+
     private User landlord;
 
 
