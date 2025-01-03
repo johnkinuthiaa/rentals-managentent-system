@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +50,7 @@ public class PropertyListingServiceImpl implements PropertyListingService {
                     LocalDateTime.now(),
                     propertyListing
             );
+            propertyListing.setLandlord(owner.get());
             propertyListing.setCreatedOn(LocalDateTime.now());
             repository.save(propertyListing);
             response.setMessage("New property for "+owner.get().getUsername()+" was created successfully");
@@ -110,8 +112,15 @@ public class PropertyListingServiceImpl implements PropertyListingService {
         agreement.setTenant(tenant);
         rentalAgreementRepository.save(agreement);
 
-        response.setMessage("New rental agreement created for "+tenantName);
+        List<User> tenants =listing.get().getTenants();
+        tenants.add(tenant);
+        List<RentalAgreement> agreements =listing.get().getRentalAgreements();
+        agreements.add(agreement);
+        listing.get().setRentalAgreements(agreements);
+        repository.save(listing.get());
 
+        response.setMessage("New rental agreement created for "+tenantName);
+        response.setStatusCode(200);
 
         return response;
     }
