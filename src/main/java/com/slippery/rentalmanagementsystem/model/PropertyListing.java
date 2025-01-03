@@ -31,10 +31,9 @@ public class PropertyListing {
     private LocalDateTime createdOn;
 
     @ManyToOne
-    private User user;
-//    if its a rental
-    @ManyToMany
+    private User landlord;
+    @OneToMany
     private List<User> tenants =new ArrayList<>();
-    @ManyToMany
+    @OneToMany
     private List<RentalAgreement> rentalAgreements;
 }

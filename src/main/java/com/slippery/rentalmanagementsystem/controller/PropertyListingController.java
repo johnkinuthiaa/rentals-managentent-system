@@ -21,4 +21,11 @@ public class PropertyListingController {
         return ResponseEntity.ok(service.createNewProperty(propertyListing, ownerId));
 
     }
+    @PostMapping("/add/tenant")
+    public PropertyListingDto addUser(@RequestBody PropertyListingDto request,
+                                      @RequestParam Long propertyId, @RequestParam  Long ownerId,
+                                      @RequestParam  String tenantName){
+        return service.addUser(request, propertyId, ownerId, tenantName);
+
+    }
 }

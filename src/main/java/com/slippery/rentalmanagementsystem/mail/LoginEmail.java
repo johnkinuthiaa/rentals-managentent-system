@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
 public class LoginEmail {
+
     /**
      * author @john kinuthia
      * send email to user every time they log in to their account
@@ -29,7 +31,6 @@ public class LoginEmail {
             String systemName =InetAddress.getLocalHost().getHostName();
             String ipAddress =InetAddress.getLocalHost().getHostAddress();
             String browser = httpServletRequest.getHeader("user-agent");
-
             SimpleMailMessage email =new SimpleMailMessage();
             email.setSubject("New login alert");
             email.setTo(to);
