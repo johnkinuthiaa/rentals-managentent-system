@@ -185,7 +185,7 @@ public class PropertyListingServiceImpl implements PropertyListingService {
 
 
         //        delete user
-        userRepository.delete(tenant.get());
+        userRepository.deleteById(tenantId);
         response.setMessage("User removed from the system");
         response.setStatusCode(200);
         return response;
@@ -193,7 +193,29 @@ public class PropertyListingServiceImpl implements PropertyListingService {
 
     @Override
     public PropertyListingDto deleteProperty(Long propertyId, Long ownerId) {
-        return null;
+        PropertyListingDto response =new PropertyListingDto();
+        Optional<User>owner =userRepository.findById(ownerId);
+        Optional<PropertyListing> listing =repository.findById(propertyId);
+
+        if(owner.isEmpty()){
+            response.setMessage("owner not found");
+            response.setStatusCode(404);
+            return response;
+        }
+        if(listing.isEmpty()){
+            response.setMessage("property not found");
+            response.setStatusCode(404);
+            return response;
+        }
+        if(!listing.get().getLandlord().getId().equals(owner.get().getId())){
+            response.setMessage("property does not belong to "+owner.get().getUsername());
+            response.setStatusCode(404);
+            return response;
+        }
+        repository.deleteById(listing.get().getId());
+        response.setMessage("Listing" +listing.get().getName()+" deleted");
+        response.setStatusCode(200);
+        return response;
     }
 
     @Override
