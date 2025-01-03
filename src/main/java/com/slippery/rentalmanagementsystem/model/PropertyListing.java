@@ -19,7 +19,6 @@ public class PropertyListing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//    name if its an apartment or rental
     private String name;
     private String location;
     private String address;
@@ -30,9 +29,12 @@ public class PropertyListing {
     private String status;
     private String images;
     private LocalDateTime createdOn;
+
     @ManyToOne
     private User user;
 //    if its a rental
     @ManyToMany
     private List<User> tenants =new ArrayList<>();
+    @ManyToMany
+    private List<RentalAgreement> rentalAgreements;
 }

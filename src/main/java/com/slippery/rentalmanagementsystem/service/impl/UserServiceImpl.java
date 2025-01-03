@@ -1,7 +1,7 @@
 package com.slippery.rentalmanagementsystem.service.impl;
 
 import com.slippery.rentalmanagementsystem.dto.UserDto;
-import com.slippery.rentalmanagementsystem.UserNotFound;
+import com.slippery.rentalmanagementsystem.exceptions.UserNotFound;
 import com.slippery.rentalmanagementsystem.mail.LoginEmail;
 import com.slippery.rentalmanagementsystem.mail.Register;
 import com.slippery.rentalmanagementsystem.model.User;

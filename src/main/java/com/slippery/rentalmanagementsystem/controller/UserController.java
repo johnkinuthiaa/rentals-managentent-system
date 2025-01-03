@@ -1,6 +1,6 @@
 package com.slippery.rentalmanagementsystem.controller;
 
-import com.slippery.rentalmanagementsystem.UserNotFound;
+import com.slippery.rentalmanagementsystem.exceptions.UserNotFound;
 import com.slippery.rentalmanagementsystem.dto.UserDto;
 import com.slippery.rentalmanagementsystem.model.User;
 import com.slippery.rentalmanagementsystem.service.UserService;
