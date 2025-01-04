@@ -138,7 +138,7 @@ public class PropertyListingServiceImpl implements PropertyListingService {
     }
 
     @Override
-    public PropertyListingDto removeUser(Long propertyId, Long ownerId, Long tenantId) {
+    public PropertyListingDto removeUser(Long propertyId, Long ownerId, Long tenantId,Long agreementId) {
         PropertyListingDto response =new PropertyListingDto();
         Optional<User>owner =userRepository.findById(ownerId);
         Optional<PropertyListing> listing =repository.findById(propertyId);
@@ -171,21 +171,13 @@ public class PropertyListingServiceImpl implements PropertyListingService {
         }
 
 
-        //        remove user from property tenants
-        listing.get().getTenants().remove(tenant.get());
-        repository.save(listing.get());
 
+//        deleting the agreement
+        Optional<RentalAgreement> agreement =rentalAgreementRepository.findById(agreementId);
+        rentalAgreementRepository.delete(agreement.get());
+//        RentalAgreement toDelete =rentalAgreementRepository.findById(agreement.get().getId()).orElseThrow();
+//        rentalAgreementRepository.delete(toDelete);
 
-
-//        delete agreement
-        List<RentalAgreement> agreement = new ArrayList<>(rentalAgreementRepository.findAll().stream()
-                .filter(agreement1 -> agreement1.getTenant().getId().equals(tenant.get().getId()))
-                .toList());
-        rentalAgreementRepository.delete(agreement.get(0));
-
-
-        //        delete user
-        userRepository.deleteById(tenantId);
         response.setMessage("User removed from the system");
         response.setStatusCode(200);
         return response;

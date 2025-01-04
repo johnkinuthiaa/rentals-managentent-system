@@ -34,8 +34,10 @@ public class PropertyListingController {
     public PropertyListingDto removeUser(
             @RequestParam Long propertyId,
             @RequestParam Long ownerId,
-            @RequestParam Long tenantId){
-        return service.removeUser(propertyId, ownerId, tenantId);
+            @RequestParam Long tenantId,
+            @RequestParam Long agreementId
+    ){
+        return service.removeUser(propertyId, ownerId, tenantId,agreementId);
 
     }
 }

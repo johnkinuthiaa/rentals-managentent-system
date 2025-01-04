@@ -25,11 +25,11 @@ public class RentalAgreement {
     private Long monthlyRent;
     private Long securityDeposit;
     private String status;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private PropertyListing propertyListing;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.DETACH)
     private User tenant;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
 
     private User landlord;
 

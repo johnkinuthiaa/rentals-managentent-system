@@ -11,7 +11,7 @@ public interface PropertyListingService {
     PropertyListingDto createNewProperty(PropertyListing propertyListing,Long ownerId);
     PropertyListingDto updateProperty(PropertyListing propertyListing,Long ownerId,Long propertyId);
     PropertyListingDto addUser(PropertyListingDto dto,Long propertyId, Long ownerId,String tenantName) throws IOException;
-    PropertyListingDto removeUser(Long propertyId, Long ownerId, Long tenantId);
+    PropertyListingDto removeUser(Long propertyId, Long ownerId, Long tenantId,Long agreementId);
     PropertyListingDto deleteProperty(Long propertyId,Long ownerId);
     PropertyListingDto getPropertyById(Long propertyId,Long ownerId);
     PropertyListingDto getPropertyByName(String name);

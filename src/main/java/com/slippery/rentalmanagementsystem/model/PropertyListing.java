@@ -32,10 +32,10 @@ public class PropertyListing {
     private String images;
     private LocalDateTime createdOn;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private User landlord;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     private List<User> tenants =new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     private List<RentalAgreement> rentalAgreements;
 }
